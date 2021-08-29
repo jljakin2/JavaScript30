@@ -89,6 +89,9 @@
         );
       }
 
+      // listening for change in input and anytime the mouse is moved over the input. this will lead to more event triggers than
+      // is needed but without it the variables will only update once the value is changed which gives the site a "static" feel. by
+      // monitoring the mousemove, the variables will update as the mouse moves which makes the site feel more dynamic
       inputs.forEach(input => input.addEventListener("change", handleUpdate));
       inputs.forEach(input =>
         input.addEventListener("mousemove", handleUpdate)
