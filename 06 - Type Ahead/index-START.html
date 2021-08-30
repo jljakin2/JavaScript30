@@ -1,22 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Type Ahead 👀</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Type Ahead 👀</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <form class="search-form">
+      <input type="text" class="search" placeholder="City or State" />
+      <ul class="suggestions">
+        <li>Filter for a city</li>
+        <li>or a state</li>
+      </ul>
+    </form>
+    <script>
+      const endpoint =
+        "https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json";
 
-  <form class="search-form">
-    <input type="text" class="search" placeholder="City or State">
-    <ul class="suggestions">
-      <li>Filter for a city</li>
-      <li>or a state</li>
-    </ul>
-  </form>
-<script>
-const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+      // use fetch to grab data from api
+      // the first promise is to tell fetch the data is json
+      // the second promise is to grab the data from the json and spread the data into the cities array we created
+      const cities = [];
+      fetch(endpoint)
+        .then(blob => blob.json())
+        .then(data => cities.push(...data));
 
-</script>
-</body>
+      function findMatches(wordToMatch, cities) {
+        /**
+         * take cities array and filter it so only cities or states that match the searched value are returned
+         */
+        return cities.filter(place => {
+          // setting regex expression in its own variable allows us to use the function argument as the matched expression
+          // the "gi" represents that we want to match globally (g) and case insensitive (i)
+          const regex = new RegExp(wordToMatch, "gi");
+          return place.city.match(regex) || place.state.match(regex);
+        });
+      }
+
+      function numberWithCommas(x) {
+        /**
+         * Take the population number from the api and replace it as a string formatted with commas
+         */
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+      function displayMatches() {
+        /**
+         * Find match using findMatches function and insert the found cities into the suggestions html
+         * Replace matched values with span that highlights the values
+         */
+
+        const matchArray = findMatches(this.value, cities);
+
+        // take each value in the new match array and replace the city and state name with any matching characters
+        // from the regex. then replace the list items with the matching characters and their corresponding city/state from the api
+        const html = matchArray
+          .map(place => {
+            const regex = new RegExp(this.value, "gi");
+            const cityName = place.city.replace(
+              regex,
+              `<span class="hl">${this.value}</span>`
+            );
+            const stateName = place.state.replace(
+              regex,
+              `<span class="hl">${this.value}</span>`
+            );
+            return `
+          <li>
+            <span class="name">${cityName}, ${stateName}</span>
+            <span class="population">${numberWithCommas(
+              place.population
+            )}</span>
+            </li>
+          `;
+          })
+          .join("");
+
+        // replace the content inside of the suggestions list
+        suggestions.innerHTML = html;
+      }
+
+      // grab the input and the suggestions in order to keep track of the value and update the suggestions
+      const searchInput = document.querySelector(".search");
+      const suggestions = document.querySelector(".suggestions");
+
+      // listen for when the input value is changed and for any keyup events
+      // to make it feel more like the search is happening in real time
+      searchInput.addEventListener("change", displayMatches);
+      searchInput.addEventListener("keyup", displayMatches);
+    </script>
+  </body>
 </html>
