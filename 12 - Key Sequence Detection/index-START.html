@@ -1,12 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Key Detection</title>
-  <script type="text/javascript" src="https://www.cornify.com/js/cornify.js"></script>
-</head>
-<body>
-<script>
-</script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Key Detection</title>
+    <script
+      type="text/javascript"
+      src="https://www.cornify.com/js/cornify.js"
+    ></script>
+  </head>
+  <body>
+    <script>
+      // keep track of which keys are pressed
+      const pressed = [];
+      // the code that the window will listen for to start the action
+      const secretCode = "booger";
+
+      // listen for key events on the window
+      window.addEventListener("keyup", e => {
+        // add the key that is pressed to the pressed array
+        pressed.push(e.key);
+
+        // set the starting index for the splice before the pressed array and
+        // keep removing the first item
+        const index = [
+          -secretCode.length - 1,
+          pressed.length - secretCode.length,
+        ];
+        pressed.splice(index[0], index[1]);
+
+        // if the pressed string equals the secretCode, do whatever you want
+        if (pressed.join("").includes(secretCode)) {
+          console.log("SUCCESS");
+          cornify_add();
+        }
+      });
+    </script>
+  </body>
 </html>
