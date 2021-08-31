@@ -1,19 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>HTML5 Canvas</title>
-</head>
-<body>
-<canvas id="draw" width="800" height="800"></canvas>
-<script>
-</script>
+  <head>
+    <meta charset="UTF-8" />
+    <title>HTML5 Canvas</title>
+  </head>
+  <style>
+    html,
+    body {
+      margin: 0;
+    }
+  </style>
+  <body>
+    <canvas id="draw" width="800" height="800"></canvas>
+    <script>
+      // select the canvas and then get the context and save it to a variable
+      // the context is how we will work with everything on the canvas. it never goes straight on the canvas
+      const canvas = document.querySelector("#draw");
+      const ctx = canvas.getContext("2d");
 
-<style>
-  html, body {
-    margin: 0;
-  }
-</style>
+      // make sure the canvas covers the entire width/height of the window each time it loads
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
 
-</body>
+      // set the stroke color
+      ctx.strokeStyle = "#BADA55";
+      ctx.lineJoin = "round";
+      // will show a circle if clicked once and the edges are rounded
+      ctx.lineCap = "round";
+      // base width (and eventually max width)
+      ctx.lineWidth = 100;
+
+      // define the last coordinates where the click was. we will keep updating these coordinates
+      // as the user draws on the canvas
+      let lastX = 0;
+      let lastY = 0;
+      // set the hue at 0 for now but we will keep changing the hue in the hsl as the user draws
+      let hue = 0;
+
+      let isDrawing = false;
+
+      function draw(e) {
+        /**
+         * 1. Check if the user is actually drawing
+         * 2. Set the new stroke style color
+         * 3. Update the path and stroke coordinates
+         * 4. Dynamically change hue as drawing continues
+         */
+
+        // step 1
+        if (!isDrawing) return; // stop the fn from running when they are not moused down
+
+        // step 2
+        ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+
+        // step 3
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.stroke();
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+
+        // step 4
+        hue++;
+        if (hue >= 360) {
+          hue = 0;
+        }
+      }
+
+      // listen for events on canvas to initiate drawing
+      canvas.addEventListener("mousedown", e => {
+        // if the mouse is down, we expect the user is drawing. we also want to update the coordinates
+        isDrawing = true;
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+      });
+      // as the mouse moves we also expect to keep drawing
+      canvas.addEventListener("mousemove", draw);
+
+      // listen for events on canvas to stop drawing
+      // if user lets mouse go or the mouse exits the canvas, we expect the drawing to stop
+      canvas.addEventListener("mouseup", () => (isDrawing = false));
+      canvas.addEventListener("mouseout", () => (isDrawing = false));
+    </script>
+  </body>
 </html>
